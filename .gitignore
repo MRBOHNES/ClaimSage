@@ -1,0 +1,25 @@
+# --- Secrets / env ---
+backend/.env
+.env
+.env.local
+
+# --- Python ---
+backend_venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# --- Runtime data ---
+backend/storage/
+backend/*.db
+qdrant_storage/
+
+# --- Node / React frontend (added when frontend lands) ---
+node_modules/
+/build
+
+# --- OS / editor ---
+.DS_Store
+.idea/
+.vscode/

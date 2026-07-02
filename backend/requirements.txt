@@ -7,6 +7,7 @@ pydantic-settings==2.7.1
 # --- LlamaIndex (ingestion / indexing / query) ---
 llama-index-core==0.12.11
 llama-index-llms-openai==0.3.14
+llama-index-llms-openai-like==0.3.3     # OpenRouter (OpenAI-compatible) chat
 llama-index-embeddings-openai==0.3.1
 llama-index-vector-stores-qdrant==0.4.3
 
