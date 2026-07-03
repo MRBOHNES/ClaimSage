@@ -5,8 +5,10 @@ development). Secrets like ``OPENAI_API_KEY`` must never be committed — see
 ``.env.example`` for the template.
 """
 from functools import lru_cache
+from typing import Annotated
 
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import field_validator
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -31,6 +33,8 @@ class Settings(BaseSettings):
 
     # --- Qdrant (vector store) ---
     qdrant_url: str = "http://localhost:6333"
+    # API key for managed Qdrant Cloud; empty for a local/self-hosted instance.
+    qdrant_api_key: str = ""
     qdrant_collection_name: str = "claimsage_documents"
 
     # --- Relational registry (sessions / documents / ingestion status) ---
@@ -64,8 +68,23 @@ class Settings(BaseSettings):
     max_upload_size_mb: int = 50
     upload_dir: str = "./storage/uploads"
 
-    # --- CORS (frontend dev origin) ---
-    cors_origins: list[str] = ["http://localhost:3000"]
+    # --- CORS (allowed frontend origins) ---
+    # Accepts a comma-separated string from the environment (e.g.
+    # "https://claimsage.vercel.app,http://localhost:5173") or a list in code.
+    # Defaults cover the Vite (5173) and CRA (3000) local dev servers.
+    # NoDecode disables pydantic-settings' default JSON parsing of this env var
+    # so the validator below can accept a plain comma-separated string.
+    cors_origins: Annotated[list[str], NoDecode] = [
+        "http://localhost:5173",
+        "http://localhost:3000",
+    ]
+
+    @field_validator("cors_origins", mode="before")
+    @classmethod
+    def _split_cors_origins(cls, value: object) -> object:
+        if isinstance(value, str):
+            return [origin.strip() for origin in value.split(",") if origin.strip()]
+        return value
 
 
 @lru_cache

@@ -15,9 +15,12 @@ backend/storage/
 backend/*.db
 qdrant_storage/
 
-# --- Node / React frontend (added when frontend lands) ---
+# --- Node / React frontend ---
 node_modules/
 /build
+frontend/dist/
+frontend/.env
+frontend/.env.local
 
 # --- OS / editor ---
 .DS_Store

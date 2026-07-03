@@ -1,0 +1,25 @@
+# Render Blueprint for the ClaimSage backend.
+# Deploy: push to GitHub, then in Render -> New -> Blueprint, point at this repo.
+# Qdrant runs on managed Qdrant Cloud (free tier) — set QDRANT_URL/QDRANT_API_KEY.
+#
+# Secrets (sync:false) are entered in the Render dashboard, never committed.
+services:
+  - type: web
+    name: claimsage-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free            # note: free instances cold-start after inactivity
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: OPENROUTER_API_KEY
+        sync: false        # set in dashboard: sk-or-v1-...
+      - key: QDRANT_URL
+        sync: false        # https://xxxx.cloud.qdrant.io:6333
+      - key: QDRANT_API_KEY
+        sync: false        # from Qdrant Cloud
+      - key: CORS_ORIGINS
+        sync: false        # https://<your-app>.vercel.app,http://localhost:5173
+      - key: OCR_DEFAULT_MODE
+        value: auto

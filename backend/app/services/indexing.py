@@ -40,7 +40,9 @@ def discover_embedding_dim() -> int:
 
 @lru_cache
 def get_qdrant_client() -> qdrant_client.QdrantClient:
-    return qdrant_client.QdrantClient(url=get_settings().qdrant_url)
+    s = get_settings()
+    # api_key is required by managed Qdrant Cloud; None for local/self-hosted.
+    return qdrant_client.QdrantClient(url=s.qdrant_url, api_key=s.qdrant_api_key or None)
 
 
 def ensure_collection() -> None:

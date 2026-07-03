@@ -6,6 +6,7 @@ chunks from that claim's documents and returns a grounded answer with citations.
 from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException
+from openai import OpenAIError, RateLimitError
 
 from app.models import db
 from app.models.schemas import Citation, QueryRequest, QueryResponse
@@ -21,7 +22,21 @@ def query(request: QueryRequest) -> QueryResponse:
     if not db.session_exists(request.session_id):
         raise HTTPException(status_code=404, detail="Unknown session_id.")
 
-    result = answer_question(request.session_id, request.question)
+    # Map upstream LLM/provider failures to clean, user-facing errors instead of
+    # a bare 500 (e.g. OpenRouter's free-tier daily rate limit).
+    try:
+        result = answer_question(request.session_id, request.question)
+    except RateLimitError:
+        raise HTTPException(
+            status_code=429,
+            detail="The language model is rate-limited right now. Please try again shortly.",
+        )
+    except OpenAIError as e:
+        raise HTTPException(
+            status_code=502,
+            detail=f"The language model provider returned an error: {e}",
+        )
+
     return QueryResponse(
         answer=result.answer,
         confidence=result.confidence,
