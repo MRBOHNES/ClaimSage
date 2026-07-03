@@ -1,7 +1,7 @@
 """LLM / embedding provider abstraction.
 
 All OpenAI usage in the app funnels through here so that:
-  * provider swaps (Anthropic, local models) are a one-file change, and
+  * provider swaps (OpenAI, local models) are a one-file change, and
   * the phase-2 LangChain agent layer has a single place to obtain its models.
 
 Nothing else in the codebase should import ``openai`` or the LlamaIndex OpenAI
