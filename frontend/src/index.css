@@ -1,24 +1,28 @@
 :root {
-  /* Palette — dark, deep indigo/violet accent */
-  --bg: #0a0a0f;
-  --panel: #14141d;
-  --panel-2: #1a1a26;
-  --border: #262636;
-  --border-soft: #1e1e2b;
-  --text: #eaeaf2;
-  --text-dim: #9a9ab0;
-  --text-faint: #6a6a80;
-  --accent: #7c6cf0;
-  --accent-2: #9d7cff;
-  --accent-soft: rgba(124, 108, 240, 0.14);
-  --good: #3fd07f;
-  --bad: #f0555f;
-  --radius: 14px;
-  --radius-sm: 10px;
+  /* Palette — near-black, warm amber + emerald, technical/terminal feel */
+  --bg: #0b0b0c;
+  --panel: #101012;
+  --panel-2: #16161a;
+  --border: #2a2a30;
+  --border-soft: #202024;
+  --grid: rgba(255, 255, 255, 0.022);
+  --text: #ececEA;
+  --text-dim: #8f8f8a;
+  --text-faint: #5c5c58;
+  --amber: #f5a623;
+  --amber-bright: #ffb43d;
+  --amber-soft: rgba(245, 166, 35, 0.12);
+  --emerald: #34d399;
+  --bad: #ff5d5d;
+
+  --radius: 2px;
+
+  --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+  --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 
   color-scheme: dark;
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
-    Helvetica, Arial, sans-serif;
+  font-family: var(--sans);
   color: var(--text);
   background: var(--bg);
   -webkit-font-smoothing: antialiased;
@@ -36,14 +40,13 @@ body,
   margin: 0;
 }
 
+/* faint technical grid over the whole app */
 body {
-  background:
-    radial-gradient(
-      1200px 600px at 75% 15%,
-      rgba(124, 108, 240, 0.12),
-      transparent 60%
-    ),
-    var(--bg);
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 44px 44px;
 }
 
 button {
@@ -52,10 +55,13 @@ button {
 }
 
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 9px;
+  height: 9px;
 }
 ::-webkit-scrollbar-thumb {
   background: var(--border);
-  border-radius: 8px;
+}
+::selection {
+  background: var(--amber);
+  color: #000;
 }

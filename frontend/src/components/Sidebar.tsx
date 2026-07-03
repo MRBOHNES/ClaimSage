@@ -31,10 +31,10 @@ export default function Sidebar({
   return (
     <aside className="sidebar">
       <div className="brand">
-        <div className="brand-mark">◆</div>
+        <div className="brand-mark">CS</div>
         <div>
           <div className="brand-name">ClaimSage</div>
-          <div className="brand-sub">AI Document Intelligence</div>
+          <div className="brand-sub">Document Intelligence</div>
         </div>
       </div>
 

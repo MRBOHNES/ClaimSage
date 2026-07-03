@@ -26,15 +26,16 @@ const STEPS = [
 function Hero() {
   return (
     <div className="hero">
-      <div className="badge">⚡ Powered by RAG Pipeline</div>
+      <div className="badge">◆ RAG PIPELINE · CITED ANSWERS</div>
       <h1>
-        Ask anything about
+        Ask your
         <br />
-        <span className="accent">your documents</span>
+        <span className="accent">documents</span>
+        <span className="cursor" />
       </h1>
       <p className="hero-sub">
-        Upload insurance claims, policies, or any document — get instant,
-        AI-powered answers with page-level citations.
+        Upload insurance claims, policies, scans, or a photo — get grounded
+        answers with page-level citations. Scanned pages are read via OCR.
       </p>
       <div className="steps">
         {STEPS.map((s) => (
