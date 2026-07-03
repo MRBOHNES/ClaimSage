@@ -44,6 +44,22 @@ class Settings(BaseSettings):
     # --- Retrieval ---
     similarity_top_k: int = 6
 
+    # --- OCR (scanned PDFs + image/camera uploads) ---
+    # OCR is a fallback for content with no extractable text layer. For PDFs it
+    # runs per page only when needed; images always OCR (no text layer exists).
+    ocr_enabled: bool = True
+    # Default mode when an upload request omits ?ocr_mode=.
+    #   "auto"   -> OCR a PDF page only if its text layer is below ocr_min_chars
+    #   "always" -> OCR every PDF page regardless of any text layer
+    #   "off"    -> never OCR (text layer only; images then yield nothing)
+    ocr_default_mode: str = "auto"
+    # Per-page native-text threshold (chars) below which "auto" mode OCRs a page.
+    ocr_min_chars: int = 100
+    # Rasterization DPI for OCR (higher = better accuracy, slower).
+    ocr_dpi: int = 300
+    # Tesseract language(s), e.g. "eng" or "eng+deu".
+    ocr_lang: str = "eng"
+
     # --- Uploads ---
     max_upload_size_mb: int = 50
     upload_dir: str = "./storage/uploads"

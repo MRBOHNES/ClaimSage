@@ -24,6 +24,7 @@ def ingest_document(
     session_id: str,
     file_path: str,
     filename: str,
+    ocr_mode: str = "auto",
 ) -> None:
     """Parse, chunk, embed and store one file; update its DB status throughout.
 
@@ -37,6 +38,7 @@ def ingest_document(
             filename=filename,
             claim_id=session_id,   # claim_id == session_id scopes retrieval
             document_id=document_id,
+            ocr_mode=ocr_mode,
         )
         if not documents:
             db.update_document(

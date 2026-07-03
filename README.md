@@ -34,6 +34,9 @@ Everything is free: OpenRouter free models + self-hosted Qdrant + local SQLite.
 - Docker Desktop (for Qdrant)
 - Python 3.12
 - A free [OpenRouter](https://openrouter.ai) API key
+- **Tesseract** for OCR of scanned PDFs / image uploads — `brew install tesseract`
+  (macOS) or `apt-get install tesseract-ocr` (Linux). Already bundled in the
+  Docker image; only needed for local `uvicorn` runs.
 
 ### 2. Configure secrets
 ```bash
@@ -107,8 +110,15 @@ ClaimSage/
 └── docs/ARCHITECTURE.md            # start here to learn the system
 ```
 
-Supported formats: PDF, .docx, .xlsx, .txt, .eml (50 MB max).
+Supported formats: PDF, .docx, .xlsx, .txt, .eml, and images
+(.jpg/.jpeg/.png/.tiff/.bmp) (50 MB max).
 Legacy binary `.doc` / `.msg` are rejected with a clear message.
+
+**OCR:** scanned PDF pages (no text layer) and image uploads are read via
+Tesseract OCR. For PDFs, OCR runs *only* on pages that lack extractable text
+(per-page character threshold), so digital pages stay fast and accurate. Control
+it per upload with `?ocr_mode=auto|always|off` on `POST /api/documents`
+(`auto` is the default).
 
 ---
 

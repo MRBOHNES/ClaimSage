@@ -13,6 +13,7 @@ import pytest
 from docx import Document as DocxDocument
 from openpyxl import Workbook
 
+from app.services import parsers
 from app.services.parsers import (
     UnsupportedFileTypeError,
     parse_file,
@@ -22,8 +23,8 @@ CLAIM = "test-claim"
 DOCID = "test-doc"
 
 
-def _parse(path, name):
-    return parse_file(str(path), name, CLAIM, DOCID)
+def _parse(path, name, ocr_mode="auto"):
+    return parse_file(str(path), name, CLAIM, DOCID, ocr_mode=ocr_mode)
 
 
 def test_txt(tmp_path):
@@ -37,11 +38,21 @@ def test_txt(tmp_path):
     assert docs[0].metadata["file_type"] == "txt"
 
 
-def test_pdf_pages_carry_page_labels(tmp_path):
+# Long page text (> ocr_min_chars) so "auto" mode deterministically skips OCR
+# regardless of whether a tesseract binary is installed on the test machine.
+_PAGE_1 = "Page one: general terms and conditions. " * 4
+_PAGE_2 = "Page two: cardiac coverage details and waiting periods. " * 4
+
+
+def test_pdf_pages_carry_page_labels(tmp_path, monkeypatch):
+    # OCR must not run for digital pages with a healthy text layer.
+    monkeypatch.setattr(
+        parsers.ocr, "ocr_page", _fail_if_called("ocr_page should not run")
+    )
     p = tmp_path / "policy.pdf"
     doc = fitz.open()
-    doc.new_page().insert_text((72, 72), "Page one: general terms.")
-    doc.new_page().insert_text((72, 72), "Page two: cardiac coverage.")
+    doc.new_page().insert_text((72, 72), _PAGE_1)
+    doc.new_page().insert_text((72, 72), _PAGE_2)
     doc.save(str(p))
     doc.close()
 
@@ -49,6 +60,7 @@ def test_pdf_pages_carry_page_labels(tmp_path):
     assert len(docs) == 2
     assert docs[0].metadata["page_label"] == 1
     assert docs[1].metadata["page_label"] == 2
+    assert docs[0].metadata["extraction_method"] == "text"
     assert "cardiac" in docs[1].text.lower()
 
 
@@ -110,7 +122,100 @@ def test_rejected_legacy_format(tmp_path):
 
 
 def test_unknown_extension(tmp_path):
-    p = tmp_path / "image.png"
-    p.write_bytes(b"\x89PNG")
+    p = tmp_path / "data.xyz"
+    p.write_bytes(b"whatever")
     with pytest.raises(UnsupportedFileTypeError):
-        _parse(p, "image.png")
+        _parse(p, "data.xyz")
+
+
+# --- OCR fallback + image uploads --------------------------------------------
+
+
+def _fail_if_called(msg):
+    def _boom(*args, **kwargs):
+        raise AssertionError(msg)
+
+    return _boom
+
+
+def _make_pdf(tmp_path, pages: list[str], name="scan.pdf"):
+    """Build a PDF with the given per-page text (empty string = blank page)."""
+    p = tmp_path / name
+    doc = fitz.open()
+    for text in pages:
+        page = doc.new_page()
+        if text:
+            page.insert_text((72, 72), text)
+    doc.save(str(p))
+    doc.close()
+    return p
+
+
+def test_pdf_sparse_page_triggers_ocr_in_auto(tmp_path, monkeypatch):
+    # A blank/sparse page (below the char threshold) should be OCR'd in auto mode.
+    monkeypatch.setattr(
+        parsers.ocr, "ocr_page", lambda page, dpi, lang: "OCR RECOVERED CONTENT"
+    )
+    p = _make_pdf(tmp_path, [""])  # no text layer
+    docs = _parse(p, "scan.pdf")
+    assert len(docs) == 1
+    assert docs[0].text == "OCR RECOVERED CONTENT"
+    assert docs[0].metadata["extraction_method"] == "ocr"
+    assert docs[0].metadata["page_label"] == 1
+
+
+def test_ocr_mode_always_ocrs_even_with_text(tmp_path, monkeypatch):
+    monkeypatch.setattr(
+        parsers.ocr,
+        "ocr_page",
+        lambda page, dpi, lang: "FORCED OCR " * 10,  # longer than native text
+    )
+    p = _make_pdf(tmp_path, [_PAGE_1])
+    docs = _parse(p, "scan.pdf", ocr_mode="always")
+    assert docs[0].metadata["extraction_method"] == "ocr"
+    assert "FORCED OCR" in docs[0].text
+
+
+def test_ocr_mode_off_never_ocrs(tmp_path, monkeypatch):
+    monkeypatch.setattr(parsers.ocr, "ocr_page", _fail_if_called("OCR ran with mode=off"))
+    p = _make_pdf(tmp_path, ["Hi"])  # sparse text, but OCR disabled
+    docs = _parse(p, "scan.pdf", ocr_mode="off")
+    assert len(docs) == 1
+    assert docs[0].text == "Hi"
+    assert docs[0].metadata["extraction_method"] == "text"
+
+
+def test_page_order_preserved_across_mixed_text_and_ocr(tmp_path, monkeypatch):
+    # Middle page is blank (OCR'd); the surrounding digital pages keep their text.
+    monkeypatch.setattr(
+        parsers.ocr, "ocr_page", lambda page, dpi, lang: "OCR PAGE TWO"
+    )
+    p = _make_pdf(tmp_path, [_PAGE_1, "", _PAGE_2])
+    docs = _parse(p, "scan.pdf")
+    assert [d.metadata["page_label"] for d in docs] == [1, 2, 3]
+    assert [d.metadata["extraction_method"] for d in docs] == ["text", "ocr", "text"]
+    assert docs[1].text == "OCR PAGE TWO"
+
+
+def test_image_upload_is_ocrd(tmp_path, monkeypatch):
+    monkeypatch.setattr(
+        parsers.ocr, "ocr_image_file", lambda path, lang: "TEXT FROM PHOTO"
+    )
+    p = tmp_path / "photo.jpg"
+    p.write_bytes(b"\xff\xd8\xff")  # bytes irrelevant — OCR is stubbed
+    docs = _parse(p, "photo.jpg")
+    assert len(docs) == 1
+    assert docs[0].text == "TEXT FROM PHOTO"
+    assert docs[0].metadata["extraction_method"] == "ocr"
+    assert docs[0].metadata["page_label"] == 1
+    assert docs[0].metadata["file_type"] == "jpg"
+
+
+def test_image_upload_with_ocr_off_yields_nothing(tmp_path, monkeypatch):
+    monkeypatch.setattr(
+        parsers.ocr, "ocr_image_file", _fail_if_called("OCR ran with mode=off")
+    )
+    p = tmp_path / "photo.png"
+    p.write_bytes(b"\x89PNG")
+    docs = _parse(p, "photo.png", ocr_mode="off")
+    assert docs == []

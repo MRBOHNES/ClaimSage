@@ -17,7 +17,7 @@ from app.config import get_settings
 from app.models import db
 from app.models.schemas import DocumentStatus, SessionResponse, UploadResponse
 from app.services.ingestion import ingest_document
-from app.services.parsers import REJECTED_EXTENSIONS, SUPPORTED_EXTENSIONS
+from app.services.parsers import OCR_MODES, REJECTED_EXTENSIONS, SUPPORTED_EXTENSIONS
 
 router = APIRouter(tags=["documents"])
 
@@ -33,11 +33,23 @@ async def upload_documents(
     background_tasks: BackgroundTasks,
     session_id: str = Query(...),
     files: list[UploadFile] = File(...),
+    ocr_mode: str | None = Query(
+        None,
+        description="OCR strategy for scanned PDFs/images: 'auto' (default; OCR "
+        "only pages with no text layer), 'always' (OCR every page), or 'off'.",
+    ),
 ) -> UploadResponse:
     settings = get_settings()
 
     if not db.session_exists(session_id):
         raise HTTPException(status_code=404, detail="Unknown session_id.")
+
+    ocr_mode = ocr_mode or settings.ocr_default_mode
+    if ocr_mode not in OCR_MODES:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Invalid ocr_mode '{ocr_mode}'. Use one of: {', '.join(sorted(OCR_MODES))}.",
+        )
 
     upload_dir = Path(settings.upload_dir) / session_id
     upload_dir.mkdir(parents=True, exist_ok=True)
@@ -80,6 +92,7 @@ async def upload_documents(
             session_id=session_id,
             file_path=str(dest),
             filename=upload.filename or "unnamed",
+            ocr_mode=ocr_mode,
         )
         results.append(
             DocumentStatus(
