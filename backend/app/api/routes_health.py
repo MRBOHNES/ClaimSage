@@ -17,7 +17,12 @@ def health() -> dict:
     try:
         from qdrant_client import QdrantClient
 
-        client = QdrantClient(url=settings.qdrant_url, timeout=2.0)
+        # api_key is required by managed Qdrant Cloud; None for local/self-hosted.
+        client = QdrantClient(
+            url=settings.qdrant_url,
+            api_key=settings.qdrant_api_key or None,
+            timeout=5.0,
+        )
         client.get_collections()
         qdrant_status = "ok"
     except Exception:
