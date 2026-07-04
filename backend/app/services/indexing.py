@@ -14,7 +14,7 @@ import qdrant_client
 from llama_index.core import Settings, VectorStoreIndex
 from llama_index.core.node_parser import SentenceSplitter
 from llama_index.vector_stores.qdrant import QdrantVectorStore
-from qdrant_client.models import Distance, VectorParams
+from qdrant_client.models import Distance, PayloadSchemaType, VectorParams
 
 from app.config import get_settings
 from app.services.llm_provider import get_llm_provider
@@ -46,7 +46,12 @@ def get_qdrant_client() -> qdrant_client.QdrantClient:
 
 
 def ensure_collection() -> None:
-    """Create the Qdrant collection (cosine distance) if it doesn't exist."""
+    """Create the Qdrant collection (cosine distance) if it doesn't exist, and
+    ensure the ``claim_id`` payload index that scoped retrieval filters on.
+
+    Managed Qdrant Cloud rejects a filter on an unindexed field (400), so this
+    index is required, not just an optimisation. Creating it is idempotent.
+    """
     s = get_settings()
     client = get_qdrant_client()
     existing = {c.name for c in client.get_collections().collections}
@@ -58,6 +63,15 @@ def ensure_collection() -> None:
                 distance=Distance.COSINE,
             ),
         )
+    try:
+        client.create_payload_index(
+            collection_name=s.qdrant_collection_name,
+            field_name="claim_id",
+            field_schema=PayloadSchemaType.KEYWORD,
+        )
+    except Exception:
+        # Index already exists (or a benign race) — safe to ignore.
+        pass
 
 
 @lru_cache

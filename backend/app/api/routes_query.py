@@ -36,6 +36,14 @@ def query(request: QueryRequest) -> QueryResponse:
             status_code=502,
             detail=f"The language model provider returned an error: {e}",
         )
+    except Exception as e:  # noqa: BLE001
+        # Convert any other failure into a clean HTTP error. A raw 500 bypasses
+        # the CORS middleware, so the browser would only see an opaque
+        # "NetworkError" instead of a readable message.
+        raise HTTPException(
+            status_code=500,
+            detail=f"Query failed ({type(e).__name__}). Please try again.",
+        )
 
     return QueryResponse(
         answer=result.answer,
