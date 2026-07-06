@@ -1,15 +1,26 @@
 # ClaimSage
 
 **Document-grounded Q&A over insurance claims.** Upload large documents in any
-format (PDF, Word, Excel, email, text), ask natural-language questions, and get
-fast, accurate answers grounded in your documents **with page-level citations**.
+format (PDF, Word, Excel, email, text, or a **photo of a document**), ask
+natural-language questions, and get fast, accurate answers grounded in your
+documents **with page-level citations**.
 
 Built to demonstrate a real **RAG (Retrieval-Augmented Generation)** system:
 embeddings, a vector store, semantic search, chunking strategy, multi-format
-ingestion, and a clean provider abstraction — all running on **free models**.
+ingestion, OCR for scanned documents, a React frontend, and a full cloud
+deployment — all running on **free tiers**.
 
-> New here? Read [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — it explains how
-> RAG works and walks through every part of this system.
+### 🔗 Live demo → **https://claim-sage-six.vercel.app**
+
+> First load may take ~50s — the free backend cold-starts after inactivity, then
+> it's instant.
+
+**New here?**
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — how RAG works and how each part
+  of this system fits together.
+- [`docs/LEARNING_GUIDE.md`](docs/LEARNING_GUIDE.md) — a from-scratch guide to
+  building an app like this, **including every bug we hit and how we fixed it**.
+- [`docs/DEPLOY.md`](docs/DEPLOY.md) — how the live deployment is wired up.
 
 ---
 
@@ -17,14 +28,30 @@ ingestion, and a clean provider abstraction — all running on **free models**.
 
 | Layer | Choice |
 |---|---|
-| Backend | Python 3.12 · FastAPI |
+| Frontend | React · Vite · TypeScript (deployed on **Vercel**) |
+| Backend | Python 3.12 · FastAPI (Docker, deployed on **Render**) |
 | RAG framework | LlamaIndex |
-| Vector store | Qdrant (Docker) |
+| Vector store | Qdrant (local Docker in dev · **Qdrant Cloud** in prod) |
+| OCR | Tesseract (scanned PDFs + image/camera uploads) |
 | Registry | SQLite |
 | Chat model | `google/gemma-4-26b-a4b-it:free` (OpenRouter) |
 | Embeddings | `nvidia/llama-nemotron-embed-vl-1b-v2:free` (OpenRouter, 2048-dim) |
 
-Everything is free: OpenRouter free models + self-hosted Qdrant + local SQLite.
+Everything runs on **free tiers**: OpenRouter free models + Qdrant Cloud free
+cluster + Render/Vercel free hosting.
+
+### Architecture
+
+```
+ Browser ──HTTPS──▶ Vercel (React/Vite frontend)
+                        │  fetch(VITE_API_URL)
+                        ▼
+                   Render (FastAPI + Tesseract, Docker)
+                    │            │
+                    ▼            ▼
+              Qdrant Cloud   OpenRouter
+              (vectors)      (LLM + embeddings)
+```
 
 ---
 
