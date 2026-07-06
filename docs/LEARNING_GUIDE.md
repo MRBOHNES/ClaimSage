@@ -377,6 +377,7 @@ don't copy-paste; typing is how it sticks.
 - 6.14 — How to tell if your RAG is any good (evaluation basics)
 - 6.15 — A vocabulary list you can quiz yourself on
 - 6.16 — A 4-week self-study plan and where to go next
+- 6.17 — Watch it instead: free, top-tier video sources for every topic
 
 ---
 
@@ -1210,6 +1211,138 @@ project teaches more than ten tutorials.
 
 Now go back to the top of this document and read Parts 1–5. What was jargon an hour
 ago is now your working vocabulary.
+
+---
+
+## 6.17 — Watch it instead: free, top-tier video sources for every topic
+
+Some people learn faster by watching. Below, **every topic in Part 6 is mapped to
+several free, high-quality videos/courses** so you can pick the style that suits
+you. All of these are **genuinely free** (YouTube, or free-to-audit courses).
+
+**How to use this list:** creators rename videos and links rot, so each entry is
+given as **"*Title*" — Creator**, plus a stable channel/site link. If a link ever
+breaks, search YouTube for the exact title + creator and you'll find it. Pick
+**one** option per topic — they overlap on purpose so you can choose a teaching
+style, not watch all of them.
+
+> Legend: 🎬 single video · 🎞️ playlist/series · 🎓 full free course.
+
+---
+
+### Foundations — terminal, Python setup, basic Python (§6.1, §6.4)
+- 🎓 **"CS50's Introduction to Programming with Python" (CS50P)** — Harvard / David
+  Malan. The gold-standard free beginner course. <https://cs50.harvard.edu/python>
+  (also full on YouTube: <https://youtube.com/@cs50>)
+- 🎬 **"Python for Beginners – Full Course"** — freeCodeCamp.
+  <https://youtube.com/@freecodecamp>
+- 🎬 **"Python Tutorial for Beginners (Full Course)"** — Programming with Mosh.
+  <https://youtube.com/@programmingwithmosh>
+- 🎞️ **"Python Tutorial for Beginners" (playlist)** — Corey Schafer. Clear, bite-
+  sized. <https://youtube.com/@coreyms>
+- 🎬 For the terminal specifically: **"Command Line Crash Course"** — freeCodeCamp
+  (or search "Terminal / shell tutorial for beginners").
+
+### What an LLM actually is — how they work, theory (§6.2)
+- 🎬 **"Intro to Large Language Models" (1 hr)** — Andrej Karpathy. The single best
+  plain-English overview; start here. <https://youtube.com/@AndrejKarpathy>
+- 🎬 **"Deep Dive into LLMs like ChatGPT" (~3.5 hr)** — Andrej Karpathy. Longer,
+  more complete, still beginner-approachable.
+- 🎞️ **"Neural Networks" series** incl. **"But what is a GPT? / Transformers,
+  explained visually"** — 3Blue1Brown. Best visual intuition on the planet.
+  <https://youtube.com/@3blue1brown>
+- 🎬 **"Transformers, explained clearly"** & the **Neural Networks** series —
+  StatQuest with Josh Starmer. Gentle, step-by-step. <https://youtube.com/@statquest>
+- 🎬 Various short **LLM / GPT explainers** — Computerphile.
+  <https://youtube.com/@Computerphile>
+
+### Tokens & the context window (§6.2, §6.3)
+- 🎬 **"Let's build the GPT Tokenizer"** — Andrej Karpathy. Exactly what a token is,
+  from scratch. (Channel above.)
+- Covered well inside Karpathy's **"Intro to Large Language Models"** and the
+  3Blue1Brown transformer series above — if you watched those, you already have it.
+
+### Calling an LLM from code / what an API is (§6.5, and §6.1's "what's an API")
+- 🎬 **"APIs for Beginners – How to use an API (Full Course)"** — freeCodeCamp.
+  <https://youtube.com/@freecodecamp>
+- 🎬 **"OpenAI API Python Tutorial"** — Tech With Tim (or search freeCodeCamp
+  "OpenAI API course"). <https://youtube.com/@TechWithTim>
+- 📄 Free official docs that double as tutorials: **OpenRouter Docs**
+  (<https://openrouter.ai/docs>) and **Anthropic / OpenAI API quickstarts**.
+
+### LLM configuration — temperature, top_p, sampling (§6.6)
+- 🎬 **"How to sample from language models" / "Temperature, top-k, top-p explained"**
+  — search this title on YouTube; several excellent short explainers exist. Good
+  channels: StatQuest, Computerphile.
+- 📄 **OpenAI / Anthropic API reference on sampling parameters** — the authoritative,
+  free description of each knob (temperature, top_p, penalties, max_tokens).
+- Karpathy's **"Let's build GPT from scratch"** shows sampling/temperature in real
+  code near the end.
+
+### Prompt engineering (§6.7)
+- 🎓 **"ChatGPT Prompt Engineering for Developers"** — DeepLearning.AI (Andrew Ng &
+  Isa Fulford). ~1 hr, free, hands-on, the best starting point.
+  <https://deeplearning.ai/short-courses>
+- 📄 **Anthropic's Prompt Engineering guide / interactive tutorial** — free, superb,
+  practical. (In the Anthropic docs.)
+- 🎬 **"Prompt Engineering Tutorial – Full Course"** — freeCodeCamp.
+
+### Embeddings, vectors & cosine similarity (§6.8, §6.9)
+- 🎬 **"Word Embedding and Word2Vec, Clearly Explained"** — StatQuest. The friendliest
+  intro to "text → numbers." <https://youtube.com/@statquest>
+- 🎬 **"Vectoring Words (Word Embeddings)"** — Computerphile. Short and intuitive.
+- 🎞️ The **embeddings/attention portion of the Transformer series** — 3Blue1Brown.
+  Best geometric intuition for "meaning as direction in space."
+- 🎬 Search **"What are embeddings" — freeCodeCamp / Assembly AI** for a practical,
+  code-first take.
+
+### Vector databases (§6.10)
+- 🎬 **"Vector databases explained"** — search this title; **Qdrant**, **Pinecone**,
+  and **Weaviate** each publish free, high-quality explainer videos and docs
+  (Qdrant: <https://youtube.com/@qdrant> · docs <https://qdrant.tech/documentation>).
+- 🎬 **"Vector Database Crash Course"** — freeCodeCamp.
+
+### RAG end-to-end — the whole pipeline (§6.11, §6.12)
+- 🎓 **"Building and Evaluating Advanced RAG Applications"** — DeepLearning.AI (with
+  LlamaIndex & TruEra). Free, and directly relevant to this project.
+  <https://deeplearning.ai/short-courses>
+- 🎬 **"Learn RAG From Scratch – Full Course"** — freeCodeCamp (built with the
+  LangChain team). A long, complete, free RAG walkthrough.
+  <https://youtube.com/@freecodecamp>
+- 🎬 **"RAG explained"** short overviews — IBM Technology (<https://youtube.com/@IBMTechnology>)
+  is excellent for crisp 5–10 min concept videos.
+
+### LlamaIndex specifically (§6.12)
+- 📄🎞️ **LlamaIndex official docs + YouTube** — starter tutorials that mirror §6.12.
+  <https://docs.llamaindex.ai> · <https://youtube.com/@LlamaIndex>
+- 🎓 The DeepLearning.AI **"Building and Evaluating Advanced RAG"** course above uses
+  LlamaIndex throughout.
+
+### Chunking / text splitting (§6.13)
+- 🎬 **"The 5 Levels of Text Splitting for Retrieval"** — Greg Kamradt. The canonical
+  video on chunking; watch this one. (Search the title on YouTube.)
+- Chunking is also covered hands-on inside the DeepLearning.AI RAG course and the
+  freeCodeCamp RAG course above.
+
+### Evaluating a RAG system (§6.14)
+- 🎓 **"Building and Evaluating Advanced RAG Applications"** — DeepLearning.AI. The
+  evaluation half of this course is exactly §6.14 in practice.
+- 🎓 **"Automated Testing for LLMOps"** & other free **DeepLearning.AI short courses**
+  — good next steps once you want to measure quality seriously.
+
+### One-stop mega-resources (cover almost everything above)
+- 🎞️ **"Neural Networks: Zero to Hero"** — Andrej Karpathy. If you want to *truly*
+  understand what's under the hood, this free playlist builds a language model from
+  nothing. Deeper than you need for RAG, but unmatched.
+- 🎓 **DeepLearning.AI Short Courses** — a whole library of free, ~1 hr, hands-on
+  courses on LLMs, RAG, embeddings, agents. <https://deeplearning.ai/short-courses>
+- 🎓 **freeCodeCamp** (<https://youtube.com/@freecodecamp>) — full-length free courses
+  on Python, APIs, embeddings, vector DBs, and RAG.
+
+**Suggested minimal watch-path if you only pick a few:** CS50P (Python) →
+Karpathy "Intro to Large Language Models" → StatQuest "Word Embeddings" →
+DeepLearning.AI "ChatGPT Prompt Engineering for Developers" → freeCodeCamp "Learn
+RAG From Scratch." That sequence alone takes you from zero to building RAG.
 
 ---
 
