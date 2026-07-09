@@ -1,5 +1,8 @@
 # ClaimSage — The Build-It-Yourself Learning Guide
 
+> 📥 **Download as PDF:** [`ClaimSage-Learning-Guide.pdf`](pdf/ClaimSage-Learning-Guide.pdf)
+> · [all docs as PDF](pdf/)
+
 A from-scratch guide to building a production-shaped **RAG (Retrieval-Augmented
 Generation)** application — and, just as important, **every bug we actually hit
 while building and deploying this one**, with the symptom, the root cause, the

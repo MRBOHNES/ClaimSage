@@ -1,5 +1,8 @@
 # Deploying ClaimSage live
 
+> 📥 **Download as PDF:** [`ClaimSage-Deploy.pdf`](pdf/ClaimSage-Deploy.pdf)
+> · [all docs as PDF](pdf/)
+
 This gets you a **public demo**: the React frontend on Vercel talking to the
 FastAPI backend on Render, with vectors in managed Qdrant Cloud. All three have
 free tiers.

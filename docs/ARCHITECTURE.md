@@ -1,5 +1,8 @@
 # ClaimSage — Architecture & Learning Guide
 
+> 📥 **Download as PDF:** [`ClaimSage-Architecture.pdf`](pdf/ClaimSage-Architecture.pdf)
+> · [all docs as PDF](pdf/)
+
 This document explains **how ClaimSage works and why**, aimed at someone learning
 RAG systems. Read it top-to-bottom; each section builds on the last.
 

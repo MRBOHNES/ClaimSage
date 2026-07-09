@@ -22,6 +22,15 @@ deployment — all running on **free tiers**.
   building an app like this, **including every bug we hit and how we fixed it**.
 - [`docs/DEPLOY.md`](docs/DEPLOY.md) — how the live deployment is wired up.
 
+### 📥 Download the docs (PDF)
+
+Prefer to read offline or print? Every doc is available as a PDF in
+[`docs/pdf/`](docs/pdf):
+
+- [ClaimSage — Architecture](docs/pdf/ClaimSage-Architecture.pdf)
+- [ClaimSage — Learning Guide](docs/pdf/ClaimSage-Learning-Guide.pdf) *(the big one — concepts, build order, bug journal, and the beginner course)*
+- [ClaimSage — Deploy runbook](docs/pdf/ClaimSage-Deploy.pdf)
+
 ---
 
 ## Stack
