@@ -15,12 +15,18 @@ deployment — all running on **free tiers**.
 > First load may take ~50s — the free backend cold-starts after inactivity, then
 > it's instant.
 
+![ClaimSage landing page: session sidebar, upload zone with OCR mode, and the three-step flow](docs/screenshots/landing.png)
+
+*The live app before a session is started. Upload and Q&A need the backend and Qdrant to be up (see
+[Limitations](#limitations)).*
+
 **New here?**
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — how RAG works and how each part
   of this system fits together.
 - [`docs/LEARNING_GUIDE.md`](docs/LEARNING_GUIDE.md) — a from-scratch guide to
   building an app like this, **including every bug we hit and how we fixed it**.
 - [`docs/DEPLOY.md`](docs/DEPLOY.md) — how the live deployment is wired up.
+- [`docs/README.md`](docs/README.md) — index of every doc, and which one to read for what.
 
 ### 📥 Download the docs (PDF)
 
@@ -101,6 +107,24 @@ Open http://localhost:8000/docs for interactive API docs.
 docker compose up --build     # backend + qdrant together
 ```
 
+### 5. Run the frontend (optional)
+```bash
+cd frontend
+cp .env.example .env.local    # VITE_API_URL=http://localhost:8000
+npm install
+npm run dev                   # http://localhost:5173
+```
+`npm run lint` runs Oxlint and `npm run build` type-checks and builds.
+
+### Run the tests
+```bash
+cd backend
+../backend_venv/bin/python -m pytest -q
+```
+The suite is `tests/test_parsers.py` (PDF page labels, docx, xlsx, email, rejected formats, and the three OCR modes with
+Tesseract stubbed). It needs no API key and no network. The API routes, query engine and OpenRouter calls are not
+covered by tests yet.
+
 ---
 
 ## Try it (curl)
@@ -126,24 +150,30 @@ curl -s -X POST localhost:8000/api/query \
 
 ```
 ClaimSage/
-├── backend/
+├── backend/                         # FastAPI + the RAG pipeline (Docker, deployed on Render)
 │   ├── app/
-│   │   ├── main.py                 # FastAPI app + startup
-│   │   ├── config.py               # settings from .env
-│   │   ├── api/                    # HTTP routes (health, upload, query)
-│   │   ├── models/                 # SQLite registry + Pydantic schemas
-│   │   └── services/               # the RAG pipeline
-│   │       ├── parsers.py          # multi-format → LlamaIndex Documents
-│   │       ├── indexing.py         # chunking + Qdrant wiring
-│   │       ├── ingestion.py        # orchestrates parse→chunk→embed→store
-│   │       ├── query_engine.py     # retrieval + grounded answer + citations
-│   │       ├── llm_provider.py     # OpenRouter abstraction (chat + embeddings)
+│   │   ├── main.py                  # app + CORS + startup
+│   │   ├── config.py                # settings from environment / .env
+│   │   ├── api/                     # routes_health, routes_upload, routes_query
+│   │   ├── models/                  # db.py (SQLite registry), schemas.py (Pydantic)
+│   │   └── services/
+│   │       ├── parsers.py           # multi-format -> LlamaIndex Documents
+│   │       ├── ocr.py               # Tesseract OCR for scanned pages and images
+│   │       ├── indexing.py          # chunking + Qdrant wiring
+│   │       ├── ingestion.py         # parse -> chunk -> embed -> store (background)
+│   │       ├── query_engine.py      # retrieval + grounded answer + citations
+│   │       ├── llm_provider.py      # OpenRouter abstraction (chat + embeddings)
 │   │       └── openrouter_embedding.py  # custom embedding (encoding_format fix)
-│   ├── tests/
-│   ├── requirements.txt
-│   └── Dockerfile
-├── docker-compose.yml
-└── docs/ARCHITECTURE.md            # start here to learn the system
+│   ├── tests/test_parsers.py        # parser + OCR-mode tests
+│   ├── requirements.txt  Dockerfile  .env.example
+├── frontend/                        # React + Vite + TypeScript (deployed on Vercel)
+│   └── src/                         # api.ts (typed client), App.tsx, components/{Chat,Sidebar,Uploader}.tsx
+├── docs/                            # see docs/README.md for the index
+│   ├── ARCHITECTURE.md  DEPLOY.md  LEARNING_GUIDE.md
+│   ├── pdf/                         # PDF snapshots of the three docs
+│   └── screenshots/
+├── docker-compose.yml               # Qdrant + backend for local development
+└── render.yaml                      # Render Blueprint for the backend
 ```
 
 Supported formats: PDF, .docx, .xlsx, .txt, .eml, and images
@@ -157,6 +187,22 @@ it per upload with `?ocr_mode=auto|always|off` on `POST /api/documents`
 (`auto` is the default).
 
 ---
+
+## Limitations
+
+- **Cold starts.** The free Render backend sleeps when idle; the first request can take ~50 seconds.
+- **Ephemeral registry.** The SQLite session/document registry and uploaded files live on the instance's disk and
+  reset on redeploy or sleep, so each visit starts a fresh session. The vectors persist in Qdrant Cloud.
+- **Shared free quota.** Chat and embeddings go through one free OpenRouter key. When its rate limit is hit, the API
+  answers 429 with a "rate-limited" message.
+- **No authentication.** A session id is the only thing scoping a claim's documents; there are no user accounts.
+- **Citations vary by format.** PDFs and images cite a page; Excel cites sheet and row; email cites the field; `.docx`
+  and `.txt` are indexed as whole documents, so their citations show the file name only.
+- **"Confidence" is retrieval similarity** (the top chunk's score), not a measure of whether the answer is correct.
+  Answers are advisory, not claims decisions.
+- **No accuracy numbers yet.** The evaluation harness is planned (see Status), so retrieval quality is not measured.
+- **If `/api/health` reports `"qdrant": "unreachable"`,** the vector store is down or `QDRANT_URL` /
+  `QDRANT_API_KEY` is wrong; uploads and questions will fail until that is fixed.
 
 ## Status
 
