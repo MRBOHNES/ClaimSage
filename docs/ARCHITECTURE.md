@@ -56,14 +56,18 @@ a small/free model is "enough" — it's doing the easy part.
 
 | Component | Tech | Role |
 |---|---|---|
+| Frontend | React + Vite + TypeScript (Vercel) | create a session, upload files, ask questions, show citations |
 | API server | FastAPI (Python) | HTTP endpoints the frontend calls |
 | Ingestion | LlamaIndex | parse → chunk → embed → store |
-| Vector store | **Qdrant** (Docker) | stores chunk vectors; does similarity search |
+| Vector store | **Qdrant** (Docker locally, Qdrant Cloud in production) | stores chunk vectors; does similarity search |
+| OCR | Tesseract (via `pytesseract`; PyMuPDF rasterises PDF pages) | reads scanned PDF pages and image uploads |
 | Registry | **SQLite** | tracks sessions + document ingestion status |
 | Chat model | `google/gemma-4-26b-a4b-it:free` (OpenRouter) | writes answers |
 | Embedding model | `nvidia/llama-nemotron-embed-vl-1b-v2:free` (OpenRouter) | text → 2048-dim vector |
 
-Everything runs free: OpenRouter's free models + self-hosted Qdrant + local SQLite.
+Everything runs free: OpenRouter's free models, Qdrant (a local container in development, the Qdrant Cloud free
+tier in production), SQLite for the registry, and Render/Vercel free hosting. See [`DEPLOY.md`](DEPLOY.md) for how the
+live deployment is wired.
 
 **Why two databases?** Qdrant is great at "find similar vectors" but shouldn't
 track bookkeeping like "is this upload done processing?". SQLite handles that
@@ -83,7 +87,12 @@ Code path: `routes_upload.py` → `ingestion.py` → `parsers.py` + `indexing.py
      carrying **metadata** — `source_filename`, and a location key
      (`page_label` for PDF, `sheet_name`+`row_number` for Excel, `email_field`
      for email). This metadata is what makes citations possible later.
-     - PDF → one Document per page (via PyMuPDF) so we know the page number.
+     - PDF → one Document per page (via PyMuPDF) so we know the page number. A page whose text layer is
+       shorter than `OCR_MIN_CHARS` is OCR'd (`ocr_mode=auto`); `always` OCRs every page, `off` never does.
+       Each Document records `extraction_method` (`text` or `ocr`).
+     - Images (`.jpg/.jpeg/.png/.tiff/.bmp`) → OCR'd into one Document (page 1), unless `ocr_mode=off`.
+     - Word (`.docx`) and `.txt` → one whole-document Document; there are no page boundaries, so their
+       citations show the file name without a location.
      - Excel → one Document per row (columns flattened to text) so a policy
        schedule row is never split in half.
      - Email → headers + body, and attachments are recursively parsed.
@@ -145,11 +154,12 @@ example of a real-world integration gotcha you only find by testing.)
 | Method | Path | Purpose |
 |---|---|---|
 | POST | `/api/sessions` | Start a claim; returns `session_id` |
-| POST | `/api/documents?session_id=` | Upload file(s); starts background ingestion |
+| POST | `/api/documents?session_id=&ocr_mode=` | Upload file(s); starts background ingestion. `ocr_mode` is `auto` (default), `always` or `off` |
 | GET | `/api/documents/{doc_id}/status` | Poll ingestion status |
 | GET | `/api/sessions/{session_id}/documents` | List a claim's documents |
 | POST | `/api/query` | Ask a question; returns answer + citations |
-| GET | `/api/health` | Liveness + Qdrant reachability |
+| GET | `/api/health` | Liveness + Qdrant reachability (`{"status": "ok", "qdrant": "ok" or "unreachable"}`) |
+| GET | `/` | Small index pointing at `/docs` and `/api/health` |
 
 Interactive docs auto-generated at `http://localhost:8000/docs` when running.
 

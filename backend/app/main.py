@@ -1,7 +1,7 @@
 """ClaimSage backend — FastAPI application entrypoint.
 
-Wires up CORS for the React dev frontend and mounts the API routers. Upload and
-query routers are added as their modules are implemented.
+Wires up CORS for the React frontend (allowed origins come from CORS_ORIGINS) and
+mounts the health, upload and query routers.
 """
 from contextlib import asynccontextmanager
 
