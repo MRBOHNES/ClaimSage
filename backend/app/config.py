@@ -1,7 +1,7 @@
 """Application configuration.
 
 All settings are read from environment variables (or a local ``.env`` file in
-development). Secrets like ``OPENAI_API_KEY`` must never be committed — see
+development). Secrets like ``OPENROUTER_API_KEY`` must never be committed — see
 ``.env.example`` for the template.
 """
 from functools import lru_cache
