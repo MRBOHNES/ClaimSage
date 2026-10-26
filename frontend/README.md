@@ -1,32 +1,45 @@
-# React + TypeScript + Vite
+# ClaimSage frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+React + Vite + TypeScript UI for ClaimSage: start a session, upload documents (or take a photo), watch ingestion
+progress, and ask questions with page-level citations. Deployed on Vercel.
 
-Currently, two official plugins are available:
+## Run it
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+cp .env.example .env.local    # VITE_API_URL=http://localhost:8000
+npm install
+npm run dev                   # http://localhost:5173
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+The backend must be running (see the [root README](../README.md)); the sidebar shows "Backend connected" or an
+unreachable banner by polling `/api/health` every 15 seconds.
+
+## Scripts
+
+| Command | What it does |
+|---|---|
+| `npm run dev` | Vite dev server with hot reload |
+| `npm run build` | Type-check (`tsc -b`) and production build |
+| `npm run lint` | Oxlint (`.oxlintrc.json`) |
+| `npm run preview` | Serve the production build locally |
+
+## Configuration
+
+| Variable | Purpose |
+|---|---|
+| `VITE_API_URL` | Base URL of the backend (no trailing slash). Falls back to `http://localhost:8000` when empty. In production, set it on Vercel to the Render backend URL. |
+
+## Layout
+
+```
+src/
+├── api.ts                 # typed client for the backend (sessions, upload, status, query, health)
+├── App.tsx                # state: session, documents, messages, OCR mode, health polling
+└── components/
+    ├── Sidebar.tsx        # session + document list with ingestion status
+    ├── Uploader.tsx       # drag-and-drop, camera capture, OCR mode (auto / always / off)
+    └── Chat.tsx           # landing hero, messages, citations and confidence
+```
+
+The backend's CORS list (`CORS_ORIGINS`) must include the URL this app is served from. See
+[`../docs/DEPLOY.md`](../docs/DEPLOY.md).
