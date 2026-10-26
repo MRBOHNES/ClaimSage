@@ -60,8 +60,15 @@ already in the repo.
   request wakes it (~50s). Fine for a demo; upgrade the plan to remove it.
 - **Ephemeral storage:** the SQLite session/document registry and uploaded files
   live on the instance's disk, which resets on redeploy/sleep. Each visitor just
-  starts a fresh session — vectors themselves persist in Qdrant Cloud. For
-  durable multi-visit history, move the registry to Postgres (future work).
+  starts a fresh session — vectors themselves persist in Qdrant Cloud while the
+  cluster is active. For durable multi-visit history, move the registry to
+  Postgres (future work).
+- **Qdrant Cloud inactivity:** the free cluster deactivates after a period of
+  inactivity. Then `GET /api/health` returns `{"status": "ok", "qdrant":
+  "unreachable"}` and uploads and questions fail. Reactivate the cluster in the
+  Qdrant Cloud console (or create a new one, update `QDRANT_URL` /
+  `QDRANT_API_KEY` on Render, and re-upload documents: a new cluster is empty).
+  Check Qdrant's current free-tier policy for the exact window.
 - **Never commit secrets** — all keys are set in the Render/Vercel dashboards.
 
 ## Pushing this repo to GitHub

@@ -201,8 +201,12 @@ it per upload with `?ocr_mode=auto|always|off` on `POST /api/documents`
 - **"Confidence" is retrieval similarity** (the top chunk's score), not a measure of whether the answer is correct.
   Answers are advisory, not claims decisions.
 - **No accuracy numbers yet.** The evaluation harness is planned (see Status), so retrieval quality is not measured.
-- **If `/api/health` reports `"qdrant": "unreachable"`,** the vector store is down or `QDRANT_URL` /
-  `QDRANT_API_KEY` is wrong; uploads and questions will fail until that is fixed.
+- **The free Qdrant Cloud cluster deactivates after a period of inactivity.** When that happens `/api/health` reports
+  `"qdrant": "unreachable"` (the web page still loads and the sidebar still says "Backend connected", because that
+  light only checks the API), and uploads and questions fail until the cluster is reactivated. Reactivate it in the
+  Qdrant Cloud console. If you create a new cluster instead, update `QDRANT_URL` and `QDRANT_API_KEY` on Render and
+  re-upload your documents, because a new cluster starts empty. Check Qdrant's current free-tier policy for the exact
+  inactivity window. The same symptom also appears when `QDRANT_URL` or `QDRANT_API_KEY` is wrong.
 
 ## Status
 
